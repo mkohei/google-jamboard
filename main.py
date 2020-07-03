@@ -19,6 +19,9 @@ def make_csv(input_filename, output_filename = 'output.csv'):
         writer = csv.DictWriter(f, field_names)
         writer.writeheader()
 
+        # 重複排除のために id を key にもつ配列 (値はなんでもいいので True で)
+        idkeys = {}
+
         # ページごとに分けるためにまずフレームに分ける
         frames = soup.find_all(class_="jam-frame-container")
         print(len(frames))
@@ -29,6 +32,13 @@ def make_csv(input_filename, output_filename = 'output.csv'):
 
             for postit in postits:
                 postit_data = parse_postit_data(postit)
+
+                # 重複チェック
+                _id = postit_data['id']
+                if _id in idkeys:
+                    continue
+
+                idkeys[_id] = True
                 postit_data['page'] = frame_idx
                 writer.writerow(postit_data)
 
@@ -46,12 +56,13 @@ def parse_postit_data(postit):
     }
 
 def parse_translate(postit):
-    transform_pattern = r'transform: translateX\(\d+.\d+px\) translateY\(\d+.\d+px\)'
-    decimal_pattern = r'\d+.\d+'
+    transform_pattern = r'transform: translateX\(-?\d+.\d+px\) translateY\(-?\d+.\d+px\)'
+    decimal_pattern = r'-?\d+.\d+'
 
     style = postit['style']
     match_transform = re.search(transform_pattern, style)
     if match_transform is None:
+        print(style)
         return [-1, -1]
 
     transform = match_transform.group(0)
