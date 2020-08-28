@@ -46,8 +46,8 @@ def parse_postit_data(postit):
     points = parse_translate(postit)
 
     return {
-        'id' : postit['data-element-id'],
         'value' : postit['data-value'],
+        'id' : postit['data-element-id'],
         'background-r' : postit['data-background-r'],
         'background-g' : postit['data-background-g'],
         'background-b' : postit['data-background-b'],
